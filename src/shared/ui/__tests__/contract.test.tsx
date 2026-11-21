@@ -10,7 +10,7 @@ import type { ReactElement } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { kit } from '../kit';
 
-const { Provider, Button, Card, Chip, TextField, SwitchField, ErrorText, Row, Title, HeaderButton, Screen } = kit;
+const { Provider, Button, Card, Chip, TextField, SwitchField, ErrorText, Row, Title, HeaderButton, Screen, Icon } = kit;
 const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 47, left: 0, right: 0, bottom: 34 } };
 const r = (ui: ReactElement) =>
   render(
@@ -134,5 +134,10 @@ describe('Contrato UI — contenido', () => {
       </Screen>,
     );
     expect(screen.getByText('Contenido')).toBeOnTheScreen();
+  });
+
+  it('Icon decorativo no se expone; con etiqueta sí', async () => {
+    await r(<Icon name="success" accessibilityLabel="Operación exitosa" />);
+    expect(screen.getByLabelText('Operación exitosa')).toBeOnTheScreen();
   });
 });

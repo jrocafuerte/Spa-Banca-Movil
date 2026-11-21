@@ -20,6 +20,7 @@ export const {
   ErrorText,
   Row,
   Chip,
+  Icon,
 } = kit;
 
 export type * from './contract';

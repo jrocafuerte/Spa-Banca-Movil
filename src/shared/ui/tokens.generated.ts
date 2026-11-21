@@ -20,7 +20,7 @@ export const tokens = {
       text: '#E8EEF8',
       textMuted: '#9AA9BF',
       primary: '#5B8CFF',
-      onPrimary: '#FFFFFF',
+      onPrimary: '#0B1220',
       danger: '#EF5350',
       success: '#4CAF80',
       border: '#24324A',

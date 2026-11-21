@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
-import { useSession } from '../../core/session/sessionStore';
-import { authApi } from '../../features/auth/api';
-import { formatMoney, usePosition } from '../../features/position/api';
-import { Button, Card, ErrorText, Label, Row, Screen, Spacer, Title } from '../../shared/ui';
+import { useSession } from '../../../core/session/sessionStore';
+import { authApi } from '../../../features/auth/api';
+import { formatMoney, usePosition } from '../../../features/position/api';
+import { formatDate } from '../../../shared/format';
+import { Button, Card, ErrorText, Label, Row, Screen, Spacer, Title } from '../../../shared/ui';
 
 /** Posición consolidada: cuentas, tarjetas y préstamos en una sola vista. */
 export default function PositionScreen() {
@@ -49,7 +50,7 @@ export default function PositionScreen() {
             >
               <Row
                 left={`${c.brand} ${c.panMasked}`}
-                sub={`Vence ${c.dueDate}`}
+                sub={`Vence ${formatDate(c.dueDate)}`}
                 right={formatMoney(c.statementBalance, c.currency)}
               />
               <Row left="Disponible" right={formatMoney(c.availableCredit, c.currency)} />
@@ -61,7 +62,7 @@ export default function PositionScreen() {
             <Card key={l.id}>
               <Row
                 left={l.product}
-                sub={`Próxima cuota ${l.nextDueDate}`}
+                sub={`Próxima cuota ${formatDate(l.nextDueDate)}`}
                 right={formatMoney(l.nextInstallment, l.currency)}
               />
               <Row left="Saldo capital" right={formatMoney(l.outstandingPrincipal, l.currency)} />

@@ -80,5 +80,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     apiUrl: ENVS.apiUrl,
     recaudosUrl: ENVS.recaudosUrl,
     sslPins: ENVS.pins,
+    // Configuración regional del banco (BCP 47), p. ej. 'es-PE', 'es-CO', 'es-EC', 'es-MX'.
+    locale: process.env.APP_LOCALE ?? 'es-419',
   },
 });

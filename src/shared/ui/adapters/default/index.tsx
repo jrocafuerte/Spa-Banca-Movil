@@ -3,6 +3,7 @@
  * primitivas de react-native y Design Tokens. Sirve de referencia para
  * escribir el adaptador del Design System del banco (ver ../README.md).
  */
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -14,6 +15,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type {
   ButtonProps,
@@ -21,6 +23,8 @@ import type {
   ChipProps,
   ErrorTextProps,
   HeaderButtonProps,
+  IconName,
+  IconProps,
   InlineProps,
   LabelProps,
   ProviderProps,
@@ -186,6 +190,7 @@ function HeaderButton({ label, glyph, onPress }: HeaderButtonProps) {
 
 function TextField({ label, error, ...props }: TextFieldProps) {
   const t = useTheme();
+  const [focused, setFocused] = useState(false);
   return (
     <View style={{ gap: t.spacing.xs }}>
       <Text style={{ color: t.color.textMuted, fontSize: t.font.size.label }}>{label}</Text>
@@ -197,11 +202,16 @@ function TextField({ label, error, ...props }: TextFieldProps) {
         autoCapitalize="none"
         {...props}
         accessibilityLabel={label}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         style={{
           color: t.color.text,
           backgroundColor: t.color.surface,
-          borderColor: error ? t.color.danger : t.color.border,
-          borderWidth: t.border.width.thin,
+          borderColor: error ? t.color.danger : focused ? t.color.borderSelected : t.color.border,
+          borderWidth: t.border.width.thin, // ancho constante: sin saltos de layout al enfocar
+          // El foco se indica con el borde de marca (sin el anillo genérico del sistema/navegador)
+          outlineWidth: 0,
+          outlineStyle: 'solid', // con 'auto' Chrome ignora el ancho 0 y dibuja su anillo
           borderRadius: t.radius.md,
           padding: t.spacing.md,
           fontSize: t.font.size.input,
@@ -291,6 +301,31 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.5 },
 });
 
+const IONICONS: Record<IconName, keyof typeof Ionicons.glyphMap> = {
+  home: 'home-outline',
+  transfer: 'swap-horizontal-outline',
+  pay: 'wallet-outline',
+  card: 'card-outline',
+  services: 'receipt-outline',
+  'chevron-right': 'chevron-forward',
+  back: 'chevron-back',
+  success: 'checkmark-circle',
+};
+
+function Icon({ name, color, size, accessibilityLabel }: IconProps) {
+  const t = useTheme();
+  return (
+    <Ionicons
+      name={IONICONS[name]}
+      color={typeof color === 'number' ? undefined : (color ?? t.color.text)}
+      size={size ?? t.font.size.title}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityElementsHidden={!accessibilityLabel}
+      importantForAccessibility={accessibilityLabel ? 'yes' : 'no-hide-descendants'}
+    />
+  );
+}
+
 export const defaultKit = {
   Provider,
   Screen,
@@ -307,4 +342,5 @@ export const defaultKit = {
   ErrorText,
   Row,
   Chip,
+  Icon,
 } satisfies UiKit;

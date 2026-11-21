@@ -4,6 +4,7 @@ import { ApiError, newIdempotencyKey } from '../../../core/api/http';
 import { transactionSigning } from '../../../core/security/transactionSigning';
 import { isProduction } from '../../../core/config';
 import { formatMoney, positionKeys, usePosition } from '../../../features/position/api';
+import { formatDateTime } from '../../../shared/format';
 import {
   type PreparedTransfer,
   type TransferForm,
@@ -113,7 +114,7 @@ export default function Transfers() {
           <Row left="Monto" right={formatMoney(prepared.summary.amount, prepared.summary.currency)} />
           <Row left="Destino" right={prepared.summary.to} />
           <Row left="Operación" right={result.operationId.slice(0, 8).toUpperCase()} />
-          <Row left="Fecha" right={new Date(result.executedAt).toLocaleString('es')} />
+          <Row left="Fecha" right={formatDateTime(result.executedAt)} />
         </Card>
         <Button title="Nueva transferencia" onPress={reset} />
       </Screen>

@@ -104,7 +104,7 @@ export function ServicesWebView() {
         bridge.send({
           type: 'INIT',
           payload: {
-            locale: 'es',
+            locale: config.locale,
             theme: scheme === 'dark' ? 'dark' : 'light',
             platform: Platform.OS === 'ios' ? 'ios' : 'android',
             appVersion: Constants.expoConfig?.version ?? '0.0.0',

@@ -12,6 +12,7 @@
  * - Agregar props opcionales es compatible; cambiar/eliminar exige actualizar todos los adaptadores.
  */
 import type { ComponentType, ReactNode } from 'react';
+import type { ColorValue } from 'react-native';
 import type { tokens } from './tokens.generated';
 
 export type SpacingToken = keyof typeof tokens.spacing;
@@ -116,6 +117,18 @@ export interface ChipProps {
   onPress: () => void;
 }
 
+/** Nombres SEMÁNTICOS de íconos; cada adaptador los traduce a su set (Ionicons, íconos del DS…). */
+export type IconName = 'home' | 'transfer' | 'pay' | 'card' | 'services' | 'chevron-right' | 'back' | 'success';
+
+export interface IconProps {
+  name: IconName;
+  /** Lo provee la navegación (estado activo/inactivo) a partir de los tokens. */
+  color?: ColorValue;
+  size?: number;
+  /** Si se define, el ícono es informativo; si no, es decorativo (oculto a lectores de pantalla). */
+  accessibilityLabel?: string;
+}
+
 export interface UiKit {
   /** Envoltorio raíz (p. ej. el ThemeProvider del Design System). */
   Provider: ComponentType<ProviderProps>;
@@ -133,4 +146,5 @@ export interface UiKit {
   ErrorText: ComponentType<ErrorTextProps>;
   Row: ComponentType<RowProps>;
   Chip: ComponentType<ChipProps>;
+  Icon: ComponentType<IconProps>;
 }

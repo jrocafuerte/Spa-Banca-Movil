@@ -1,6 +1,7 @@
 import { useLocalSearchParams } from 'expo-router';
-import { formatMoney, useMovements } from '../../../features/position/api';
-import { Card, ErrorText, Label, Row, Screen } from '../../../shared/ui';
+import { formatMoney, useMovements } from '../../../../features/position/api';
+import { formatDate } from '../../../../shared/format';
+import { Card, ErrorText, Label, Row, Screen } from '../../../../shared/ui';
 
 export default function Movements() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -11,11 +12,7 @@ export default function Movements() {
       {error ? <ErrorText>{(error as Error).message}</ErrorText> : null}
       {data?.items.map((m) => (
         <Card key={m.id}>
-          <Row
-            left={m.description}
-            sub={new Date(m.date).toLocaleDateString('es')}
-            right={formatMoney(m.amount, m.currency)}
-          />
+          <Row left={m.description} sub={formatDate(m.date)} right={formatMoney(m.amount, m.currency)} />
         </Card>
       ))}
     </Screen>

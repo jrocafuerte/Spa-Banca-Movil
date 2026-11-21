@@ -5,6 +5,7 @@ interface Extra {
   apiUrl: string;
   recaudosUrl: string;
   sslPins: Record<string, string[]>;
+  locale: string;
 }
 
 const extra = (Constants.expoConfig?.extra ?? {}) as Partial<Extra>;
@@ -14,6 +15,8 @@ export const config = {
   apiUrl: extra.apiUrl ?? 'http://localhost:3000',
   recaudosUrl: extra.recaudosUrl ?? 'http://localhost:3002',
   sslPins: extra.sslPins ?? {},
+  /** Configuración regional del banco (formato de montos y fechas). */
+  locale: extra.locale ?? 'es-419',
   /** Tiempo de inactividad tras el cual se cierra la sesión (PCI / regulación local). */
   inactivityTimeoutMs: 5 * 60 * 1000,
   /** Tiempo máximo en segundo plano antes de exigir re-autenticación. */

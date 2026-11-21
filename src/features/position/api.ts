@@ -53,5 +53,4 @@ export const useMovements = (accountId: string) =>
     queryFn: () => http<{ items: Movement[] }>(`/v1/accounts/${encodeURIComponent(accountId)}/movements?limit=20`),
   });
 
-export const formatMoney = (n: number, c: Currency) =>
-  new Intl.NumberFormat('es', { style: 'currency', currency: c, minimumFractionDigits: 2 }).format(n);
+export { formatMoney } from '../../shared/format';

@@ -6,6 +6,7 @@ import { isProduction } from '../../../core/config';
 import { transactionSigning } from '../../../core/security/transactionSigning';
 import { type AmountType, type CardPaymentResult, cardPaymentsApi } from '../../../features/card-payments/api';
 import { formatMoney, positionKeys, usePosition } from '../../../features/position/api';
+import { formatDate } from '../../../shared/format';
 import { Button, Card, Chip, ErrorText, Inline, Label, Row, Screen, TextField, Title } from '../../../shared/ui';
 
 export default function CardPayment() {
@@ -14,7 +15,7 @@ export default function CardPayment() {
   const { data } = usePosition();
   const [cardId, setCardId] = useState(params.cardId);
   const [fromId, setFromId] = useState<string>();
-  const [amountType, setAmountType] = useState<AmountType>('MINIMUM');
+  const [amountTypeChoice, setAmountType] = useState<AmountType>();
   const [other, setOther] = useState('');
   const [result, setResult] = useState<CardPaymentResult>();
   const [error, setError] = useState<string>();
@@ -30,6 +31,9 @@ export default function CardPayment() {
       </Screen>
     );
 
+  // Opción por defecto: mínimo si hay pago mínimo pendiente; si no, el total.
+  const amountType: AmountType = amountTypeChoice ?? (card.minimumPayment > 0 ? 'MINIMUM' : 'TOTAL');
+  const nothingDue = card.statementBalance <= 0;
   const amount =
     amountType === 'MINIMUM'
       ? card.minimumPayment
@@ -86,23 +90,27 @@ export default function CardPayment() {
         <Card key={c.id} onPress={() => setCardId(c.id)} selected={card.id === c.id}>
           <Row
             left={`${c.brand} ${c.panMasked}`}
-            sub={`Vence ${c.dueDate}`}
+            sub={`Vence ${formatDate(c.dueDate)}`}
             right={formatMoney(c.statementBalance, c.currency)}
           />
         </Card>
       ))}
       <Label muted>¿Cuánto deseas pagar?</Label>
       <Inline wrap>
-        <Chip
-          label={`Mínimo ${formatMoney(card.minimumPayment, card.currency)}`}
-          selected={amountType === 'MINIMUM'}
-          onPress={() => setAmountType('MINIMUM')}
-        />
-        <Chip
-          label={`Total ${formatMoney(card.statementBalance, card.currency)}`}
-          selected={amountType === 'TOTAL'}
-          onPress={() => setAmountType('TOTAL')}
-        />
+        {card.minimumPayment > 0 && (
+          <Chip
+            label={`Mínimo ${formatMoney(card.minimumPayment, card.currency)}`}
+            selected={amountType === 'MINIMUM'}
+            onPress={() => setAmountType('MINIMUM')}
+          />
+        )}
+        {card.statementBalance > 0 && (
+          <Chip
+            label={`Total ${formatMoney(card.statementBalance, card.currency)}`}
+            selected={amountType === 'TOTAL'}
+            onPress={() => setAmountType('TOTAL')}
+          />
+        )}
         <Chip label="Otro monto" selected={amountType === 'OTHER'} onPress={() => setAmountType('OTHER')} />
       </Inline>
       {amountType === 'OTHER' && (
@@ -123,7 +131,13 @@ export default function CardPayment() {
         </Card>
       ))}
       <ErrorText>{error}</ErrorText>
-      <Button title={`Pagar ${amount > 0 ? formatMoney(amount, card.currency) : ''}`} onPress={pay} loading={loading} />
+      {nothingDue && <Label muted>Tu tarjeta no tiene deuda pendiente.</Label>}
+      <Button
+        title={amount > 0 ? `Pagar ${formatMoney(amount, card.currency)}` : 'Pagar'}
+        onPress={pay}
+        loading={loading}
+        disabled={nothingDue || !(amount > 0)}
+      />
     </Screen>
   );
 }
