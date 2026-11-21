@@ -1,60 +1,152 @@
+/**
+ * Kit de UI de la app. Es la ÚNICA capa que importa primitivas visuales de
+ * react-native (regla ESLint `no-restricted-imports` en pantallas). Todos los
+ * valores visuales provienen de los Design Tokens (./theme).
+ */
 import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   type TextInputProps,
   View,
-  type ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { radius, spacing, useTheme } from './theme';
+import { type SpacingToken, useTheme } from './theme';
 
-export function Screen({ children, scroll = true }: { children: ReactNode; scroll?: boolean }) {
+export { useTheme } from './theme';
+
+export function Screen({
+  children,
+  scroll = true,
+  center = false,
+  refreshing,
+  onRefresh,
+}: {
+  children: ReactNode;
+  scroll?: boolean;
+  center?: boolean;
+  refreshing?: boolean;
+  onRefresh?: () => void;
+}) {
   const t = useTheme();
-  const content = <View style={{ padding: spacing(4), gap: spacing(3) }}>{children}</View>;
+  const content = (
+    <View style={[{ padding: t.spacing.lg, gap: t.spacing.md }, center && styles.center]}>{children}</View>
+  );
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: t.bg }}>
-      {scroll ? <ScrollView keyboardShouldPersistTaps="handled">{content}</ScrollView> : content}
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: t.color.background }}>
+      {scroll ? (
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          refreshControl={
+            onRefresh ? (
+              <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={t.color.primary} />
+            ) : undefined
+          }
+        >
+          {content}
+        </ScrollView>
+      ) : (
+        content
+      )}
     </SafeAreaView>
+  );
+}
+
+/** Disposición horizontal con separación de tokens. */
+export function Inline({
+  children,
+  gap = 'sm',
+  wrap = false,
+  justify = 'flex-start',
+}: {
+  children: ReactNode;
+  gap?: SpacingToken;
+  wrap?: boolean;
+  justify?: 'flex-start' | 'space-between' | 'center';
+}) {
+  const t = useTheme();
+  return (
+    <View style={[styles.inline, { gap: t.spacing[gap], flexWrap: wrap ? 'wrap' : 'nowrap', justifyContent: justify }]}>
+      {children}
+    </View>
+  );
+}
+
+export function Spacer({ size = 'sm' }: { size?: SpacingToken }) {
+  const t = useTheme();
+  return <View style={{ height: t.spacing[size] }} />;
+}
+
+export function Loading() {
+  const t = useTheme();
+  return (
+    <View style={[styles.fill, styles.center]}>
+      <ActivityIndicator color={t.color.primary} />
+    </View>
   );
 }
 
 export function Title({ children }: { children: ReactNode }) {
   const t = useTheme();
   return (
-    <Text style={[styles.title, { color: t.text }]} accessibilityRole="header">
+    <Text
+      style={{ color: t.color.text, fontSize: t.font.size.title, fontWeight: t.font.weight.bold }}
+      accessibilityRole="header"
+    >
       {children}
     </Text>
   );
 }
 
-export function Label({ children, muted }: { children: ReactNode; muted?: boolean }) {
+export function Label({ children, muted, center }: { children: ReactNode; muted?: boolean; center?: boolean }) {
   const t = useTheme();
-  return <Text style={{ color: muted ? t.muted : t.text, fontSize: 15 }}>{children}</Text>;
+  return (
+    <Text
+      style={{
+        color: muted ? t.color.textMuted : t.color.text,
+        fontSize: t.font.size.body,
+        textAlign: center ? 'center' : 'auto',
+      }}
+    >
+      {children}
+    </Text>
+  );
 }
 
 export function Card({
   children,
-  style,
+  selected,
   onPress,
   accessibilityLabel,
 }: {
   children: ReactNode;
-  style?: ViewStyle;
+  selected?: boolean;
   onPress?: () => void;
   accessibilityLabel?: string;
 }) {
   const t = useTheme();
-  const s = [styles.card, { backgroundColor: t.surface, borderColor: t.border }, style];
+  const s = [
+    {
+      backgroundColor: t.color.surface,
+      borderColor: selected ? t.color.borderSelected : t.color.border,
+      borderWidth: selected ? t.border.width.selected : t.border.width.thin,
+      borderRadius: t.radius.lg,
+      padding: t.spacing.lg,
+      gap: t.spacing.sm,
+    },
+  ];
   return onPress ? (
     <Pressable
-      style={({ pressed }) => [...s, pressed && { opacity: 0.7 }]}
+      style={({ pressed }) => [...s, pressed && styles.pressed]}
       onPress={onPress}
       accessibilityRole="button"
+      accessibilityState={{ selected }}
       accessibilityLabel={accessibilityLabel}
     >
       {children}
@@ -79,6 +171,7 @@ export function Button({
 }) {
   const t = useTheme();
   const primary = variant === 'primary';
+  const fg = primary ? t.color.onPrimary : t.color.primary;
   return (
     <Pressable
       accessibilityRole="button"
@@ -86,19 +179,34 @@ export function Button({
       disabled={disabled || loading}
       onPress={onPress}
       style={({ pressed }) => [
-        styles.button,
         {
-          backgroundColor: primary ? t.primary : 'transparent',
-          borderColor: t.primary,
-          opacity: disabled ? 0.5 : pressed ? 0.8 : 1,
+          backgroundColor: primary ? t.color.primary : 'transparent',
+          borderColor: t.color.primary,
+          borderWidth: t.border.width.thin,
+          borderRadius: t.radius.lg,
+          paddingVertical: t.spacing.lg,
+          alignItems: 'center',
         },
+        disabled ? styles.disabled : pressed && styles.pressed,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={primary ? t.onPrimary : t.primary} />
+        <ActivityIndicator color={fg} />
       ) : (
-        <Text style={[styles.buttonText, { color: primary ? t.onPrimary : t.primary }]}>{title}</Text>
+        <Text style={{ color: fg, fontSize: t.font.size.body, fontWeight: t.font.weight.semibold }}>{title}</Text>
       )}
+    </Pressable>
+  );
+}
+
+/** Botón de icono/texto para cabeceras nativas (p. ej. "atrás"). */
+export function HeaderButton({ label, glyph, onPress }: { label: string; glyph: string; onPress: () => void }) {
+  const t = useTheme();
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={t.spacing.md}>
+      <Text style={{ color: t.color.primary, fontSize: t.font.size.display, paddingHorizontal: t.spacing.sm }}>
+        {glyph}
+      </Text>
     </Pressable>
   );
 }
@@ -106,18 +214,26 @@ export function Button({
 export function TextField({ label, error, ...props }: TextInputProps & { label: string; error?: string }) {
   const t = useTheme();
   return (
-    <View style={{ gap: spacing(1.5) }}>
-      <Text style={{ color: t.muted, fontSize: 14 }}>{label}</Text>
+    <View style={{ gap: t.spacing.xs }}>
+      <Text style={{ color: t.color.textMuted, fontSize: t.font.size.label }}>{label}</Text>
       <TextInput
-        placeholderTextColor={t.muted}
+        placeholderTextColor={t.color.textMuted}
         autoCorrect={false}
         // Evita que el teclado aprenda/sugiera datos sensibles
         {...props}
         accessibilityLabel={label}
-        style={[styles.input, { color: t.text, backgroundColor: t.surface, borderColor: error ? t.danger : t.border }]}
+        style={{
+          color: t.color.text,
+          backgroundColor: t.color.surface,
+          borderColor: error ? t.color.danger : t.color.border,
+          borderWidth: t.border.width.thin,
+          borderRadius: t.radius.md,
+          padding: t.spacing.md,
+          fontSize: t.font.size.input,
+        }}
       />
       {error ? (
-        <Text style={{ color: t.danger, fontSize: 13 }} accessibilityLiveRegion="polite">
+        <Text style={{ color: t.color.danger, fontSize: t.font.size.caption }} accessibilityLiveRegion="polite">
           {error}
         </Text>
       ) : null}
@@ -125,11 +241,34 @@ export function TextField({ label, error, ...props }: TextInputProps & { label: 
   );
 }
 
+export function SwitchField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  const t = useTheme();
+  return (
+    <Inline justify="space-between">
+      <Label>{label}</Label>
+      <Switch
+        value={value}
+        onValueChange={onChange}
+        accessibilityLabel={label}
+        trackColor={{ true: t.color.primary, false: t.color.border }}
+      />
+    </Inline>
+  );
+}
+
 export function ErrorText({ children }: { children?: ReactNode }) {
   const t = useTheme();
   if (!children) return null;
   return (
-    <Text style={{ color: t.danger }} accessibilityRole="alert">
+    <Text style={{ color: t.color.danger, fontSize: t.font.size.body }} accessibilityRole="alert">
       {children}
     </Text>
   );
@@ -138,12 +277,20 @@ export function ErrorText({ children }: { children?: ReactNode }) {
 export function Row({ left, right, sub }: { left: ReactNode; right?: ReactNode; sub?: ReactNode }) {
   const t = useTheme();
   return (
-    <View style={styles.row}>
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: t.text, fontSize: 16 }}>{left}</Text>
-        {sub ? <Text style={{ color: t.muted, fontSize: 13, marginTop: 2 }}>{sub}</Text> : null}
+    <View style={[styles.inline, { gap: t.spacing.md }]}>
+      <View style={styles.fill}>
+        <Text style={{ color: t.color.text, fontSize: t.font.size.body }}>{left}</Text>
+        {sub ? (
+          <Text style={{ color: t.color.textMuted, fontSize: t.font.size.caption, marginTop: t.spacing.xs / 2 }}>
+            {sub}
+          </Text>
+        ) : null}
       </View>
-      {right ? <Text style={{ color: t.text, fontSize: 16, fontWeight: '600' }}>{right}</Text> : null}
+      {right ? (
+        <Text style={{ color: t.color.text, fontSize: t.font.size.body, fontWeight: t.font.weight.semibold }}>
+          {right}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -155,22 +302,24 @@ export function Chip({ label, selected, onPress }: { label: string; selected: bo
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      style={[
-        styles.chip,
-        { borderColor: selected ? t.primary : t.border, backgroundColor: selected ? t.primary : t.surface },
-      ]}
+      style={{
+        borderWidth: t.border.width.thin,
+        borderRadius: t.radius.pill,
+        paddingVertical: t.spacing.sm,
+        paddingHorizontal: t.spacing.md,
+        borderColor: selected ? t.color.primary : t.color.border,
+        backgroundColor: selected ? t.color.primary : t.color.surface,
+      }}
     >
-      <Text style={{ color: selected ? t.onPrimary : t.text }}>{label}</Text>
+      <Text style={{ color: selected ? t.color.onPrimary : t.color.text, fontSize: t.font.size.label }}>{label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 22, fontWeight: '700' },
-  card: { borderWidth: StyleSheet.hairlineWidth, borderRadius: radius, padding: spacing(4), gap: spacing(2) },
-  button: { borderRadius: radius, borderWidth: 1, paddingVertical: spacing(4), alignItems: 'center' },
-  buttonText: { fontSize: 16, fontWeight: '600' },
-  input: { borderWidth: 1, borderRadius: 12, padding: spacing(3.5), fontSize: 17 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing(3) },
-  chip: { borderWidth: 1, borderRadius: 999, paddingVertical: spacing(2), paddingHorizontal: spacing(3.5) },
+  fill: { flex: 1 },
+  center: { alignItems: 'center', justifyContent: 'center' },
+  inline: { flexDirection: 'row', alignItems: 'center' },
+  pressed: { opacity: 0.75 },
+  disabled: { opacity: 0.5 },
 });

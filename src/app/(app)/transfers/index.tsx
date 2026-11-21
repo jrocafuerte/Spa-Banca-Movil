@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
-import { View } from 'react-native';
 import { ApiError, newIdempotencyKey } from '../../../core/api/http';
 import { transactionSigning } from '../../../core/security/transactionSigning';
 import { isProduction } from '../../../core/config';
@@ -12,8 +11,7 @@ import {
   type TransferResult,
   transfersApi,
 } from '../../../features/transfers/api';
-import { Button, Card, Chip, ErrorText, Label, Row, Screen, TextField, Title } from '../../../shared/ui';
-import { spacing } from '../../../shared/ui/theme';
+import { Button, Card, Chip, ErrorText, Inline, Label, Row, Screen, TextField, Title } from '../../../shared/ui';
 
 type Kind = TransferForm['type'];
 const KINDS: { id: Kind; label: string }[] = [
@@ -157,18 +155,14 @@ export default function Transfers() {
 
   return (
     <Screen>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing(2) }}>
+      <Inline wrap>
         {KINDS.map((k) => (
           <Chip key={k.id} label={k.label} selected={type === k.id} onPress={() => setType(k.id)} />
         ))}
-      </View>
+      </Inline>
       <Label muted>Cuenta de origen</Label>
       {accounts.map((a) => (
-        <Card
-          key={a.id}
-          onPress={() => setFrom(a.id)}
-          style={from?.id === a.id ? { borderColor: '#0B5FFF', borderWidth: 2 } : undefined}
-        >
+        <Card key={a.id} onPress={() => setFrom(a.id)} selected={from?.id === a.id}>
           <Row
             left={`${a.type === 'SAVINGS' ? 'Ahorros' : 'Corriente'} ${a.numberMasked}`}
             right={formatMoney(a.availableBalance, a.currency)}

@@ -2,25 +2,14 @@ import * as Crypto from 'expo-crypto';
 import * as Haptics from 'expo-haptics';
 import { useNavigation, useRouter } from 'expo-router';
 import { type ComponentType, type Ref, useCallback, useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  AppState,
-  BackHandler,
-  Platform,
-  Pressable,
-  Share,
-  Text,
-  View,
-  useColorScheme,
-} from 'react-native';
+import { Alert, AppState, BackHandler, Platform, Share, useColorScheme } from 'react-native';
 import { WebView, type WebViewMessageEvent, type WebViewProps } from 'react-native-webview';
 import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes';
 import Constants from 'expo-constants';
 import { config, isProduction, trustedWebOrigins } from '../../core/config';
 import { transactionSigning } from '../../core/security/transactionSigning';
 import { useSession } from '../../core/session/sessionStore';
-import { Button, ErrorText, Screen } from '../../shared/ui';
+import { Button, ErrorText, HeaderButton, Loading, Screen, useTheme } from '../../shared/ui';
 import { formatMoney } from '../position/api';
 import { servicePaymentsApi } from './api';
 import { type NativeBridge, createNativeBridge, originOf } from './bridge/nativeBridge';
@@ -42,6 +31,7 @@ export function ServicesWebView() {
   const navigation = useNavigation();
   const router = useRouter();
   const scheme = useColorScheme();
+  const theme = useTheme();
   const ref = useRef<WebViewHandle>(null);
   const [handoff, setHandoff] = useState<string>();
   const [error, setError] = useState<string>();
@@ -138,11 +128,7 @@ export function ServicesWebView() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (
-        <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Atrás" hitSlop={12}>
-          <Text style={{ fontSize: 28, paddingHorizontal: 8 }}>‹</Text>
-        </Pressable>
-      ),
+      headerLeft: () => <HeaderButton label="Atrás" glyph="‹" onPress={onBack} />,
     });
     const sub = BackHandler.addEventListener('hardwareBackPress', onBack);
     return () => sub.remove();
@@ -176,11 +162,7 @@ export function ServicesWebView() {
     );
   }
   if (!handoff) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <ActivityIndicator />
-      </View>
-    );
+    return <Loading />;
   }
 
   // Hallazgos de mobsfscan revisados y aceptados (ver .mobsf y docs/SECURITY.md §WebView):
@@ -225,7 +207,8 @@ export function ServicesWebView() {
       pullToRefreshEnabled={false}
       automaticallyAdjustContentInsets={false}
       contentInsetAdjustmentBehavior="never"
-      style={{ flex: 1 }}
+      // Fondo con el token del tema: evita el destello blanco mientras carga el micro frontend
+      style={{ flex: 1, backgroundColor: theme.color.background }}
     />
   );
 }

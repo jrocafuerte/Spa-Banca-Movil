@@ -1,10 +1,9 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Switch, View } from 'react-native';
 import { ApiError } from '../../core/api/http';
 import { biometricsAvailable } from '../../core/security/biometrics';
 import { authApi } from '../../features/auth/api';
-import { Button, ErrorText, Label, Screen, TextField } from '../../shared/ui';
+import { Button, ErrorText, Label, Screen, SwitchField, TextField } from '../../shared/ui';
 
 export default function Otp() {
   const { challengeId, destination } = useLocalSearchParams<{ challengeId: string; destination: string }>();
@@ -47,12 +46,7 @@ export default function Otp() {
         textContentType="oneTimeCode"
         maxLength={6}
       />
-      {bioAvailable && (
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Label>Usar biometría para próximos ingresos</Label>
-          <Switch value={bio} onValueChange={setBio} accessibilityLabel="Usar biometría" />
-        </View>
-      )}
+      {bioAvailable && <SwitchField label="Usar biometría para próximos ingresos" value={bio} onChange={setBio} />}
       <ErrorText>{error}</ErrorText>
       <Button title="Verificar" onPress={submit} loading={loading} disabled={otp.length !== 6} />
     </Screen>

@@ -1,6 +1,7 @@
 import * as ScreenCapture from 'expo-screen-capture';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { AppState, Text, View } from 'react-native';
+import { AppState, View } from 'react-native';
+import { ErrorText, Screen } from '../../shared/ui';
 import { config, isProduction } from '../config';
 import { useSession } from '../session/sessionStore';
 import { checkDeviceIntegrity } from './integrity';
@@ -63,11 +64,9 @@ export function SecurityGate({ children }: { children: ReactNode }) {
 
   if (blocked) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
-        <Text style={{ fontSize: 18, textAlign: 'center' }} accessibilityRole="alert">
-          {blocked}
-        </Text>
-      </View>
+      <Screen scroll={false} center>
+        <ErrorText>{blocked}</ErrorText>
+      </Screen>
     );
   }
   if (!ready) return null;

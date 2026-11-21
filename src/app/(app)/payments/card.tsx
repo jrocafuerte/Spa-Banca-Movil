@@ -1,14 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
-import { View } from 'react-native';
 import { ApiError, newIdempotencyKey } from '../../../core/api/http';
 import { isProduction } from '../../../core/config';
 import { transactionSigning } from '../../../core/security/transactionSigning';
 import { type AmountType, type CardPaymentResult, cardPaymentsApi } from '../../../features/card-payments/api';
 import { formatMoney, positionKeys, usePosition } from '../../../features/position/api';
-import { Button, Card, Chip, ErrorText, Label, Row, Screen, TextField, Title } from '../../../shared/ui';
-import { spacing } from '../../../shared/ui/theme';
+import { Button, Card, Chip, ErrorText, Inline, Label, Row, Screen, TextField, Title } from '../../../shared/ui';
 
 export default function CardPayment() {
   const params = useLocalSearchParams<{ cardId?: string }>();
@@ -85,7 +83,7 @@ export default function CardPayment() {
     <Screen>
       <Label muted>Tarjeta</Label>
       {data.cards.map((c) => (
-        <Card key={c.id} onPress={() => setCardId(c.id)}>
+        <Card key={c.id} onPress={() => setCardId(c.id)} selected={card.id === c.id}>
           <Row
             left={`${c.brand} ${c.panMasked}`}
             sub={`Vence ${c.dueDate}`}
@@ -94,7 +92,7 @@ export default function CardPayment() {
         </Card>
       ))}
       <Label muted>¿Cuánto deseas pagar?</Label>
-      <View style={{ flexDirection: 'row', gap: spacing(2), flexWrap: 'wrap' }}>
+      <Inline wrap>
         <Chip
           label={`Mínimo ${formatMoney(card.minimumPayment, card.currency)}`}
           selected={amountType === 'MINIMUM'}
@@ -106,7 +104,7 @@ export default function CardPayment() {
           onPress={() => setAmountType('TOTAL')}
         />
         <Chip label="Otro monto" selected={amountType === 'OTHER'} onPress={() => setAmountType('OTHER')} />
-      </View>
+      </Inline>
       {amountType === 'OTHER' && (
         <TextField
           label="Monto"
@@ -117,11 +115,7 @@ export default function CardPayment() {
       )}
       <Label muted>Cuenta de cargo</Label>
       {data.accounts.map((a) => (
-        <Card
-          key={a.id}
-          onPress={() => setFromId(a.id)}
-          style={from.id === a.id ? { borderColor: '#0B5FFF', borderWidth: 2 } : undefined}
-        >
+        <Card key={a.id} onPress={() => setFromId(a.id)} selected={from.id === a.id}>
           <Row
             left={`${a.type === 'SAVINGS' ? 'Ahorros' : 'Corriente'} ${a.numberMasked}`}
             right={formatMoney(a.availableBalance, a.currency)}

@@ -2,10 +2,16 @@
 const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
 
+/** Valores visuales fijos prohibidos: deben venir de los Design Tokens. */
+const HEX_COLOR = {
+  selector: "Literal[value=/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
+  message: 'Usa un token de color (useTheme().color.*); no colores fijos. Ver design-tokens/README.md',
+};
+
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*', '.expo/*', 'android/*', 'ios/*', 'coverage/*'],
+    ignores: ['dist/*', '.expo/*', 'android/*', 'ios/*', 'coverage/*', 'src/shared/ui/tokens.generated.ts'],
   },
   {
     rules: {
@@ -13,6 +19,58 @@ module.exports = defineConfig([
       'no-implied-eval': 'error',
       'no-new-func': 'error',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-restricted-syntax': ['error', HEX_COLOR],
+    },
+  },
+  {
+    // Pantallas y features: solo componentes del kit (src/shared/ui), que es la capa
+    // reemplazable por el Design System del banco.
+    files: ['src/app/**/*.{ts,tsx}', 'src/features/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'react-native',
+              importNames: [
+                'View',
+                'Text',
+                'TextInput',
+                'Pressable',
+                'TouchableOpacity',
+                'TouchableHighlight',
+                'ScrollView',
+                'FlatList',
+                'SectionList',
+                'Switch',
+                'Image',
+                'ActivityIndicator',
+                'RefreshControl',
+                'StyleSheet',
+                'Button',
+                'Modal',
+              ],
+              message: 'Importa componentes desde src/shared/ui (capa del Design System).',
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        HEX_COLOR,
+        {
+          selector: "JSXAttribute[name.name='style'][value.type='JSXExpressionContainer']",
+          message: 'Sin estilos inline en pantallas: usa props del kit de UI o tokens.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/features/service-payments/ServicesWebView.tsx'],
+    rules: {
+      // El WebView es un componente nativo de plataforma, no del Design System; su único estilo usa tokens.
+      'no-restricted-syntax': ['error', HEX_COLOR],
     },
   },
 ]);

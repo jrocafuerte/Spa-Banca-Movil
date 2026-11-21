@@ -1,24 +1,17 @@
 import { useRouter } from 'expo-router';
-import { RefreshControl, ScrollView, View } from 'react-native';
 import { useSession } from '../../core/session/sessionStore';
 import { authApi } from '../../features/auth/api';
 import { formatMoney, usePosition } from '../../features/position/api';
-import { Button, Card, ErrorText, Label, Row, Title } from '../../shared/ui';
-import { spacing, useTheme } from '../../shared/ui/theme';
+import { Button, Card, ErrorText, Label, Row, Screen, Spacer, Title } from '../../shared/ui';
 
 /** Posición consolidada: cuentas, tarjetas y préstamos en una sola vista. */
 export default function PositionScreen() {
-  const t = useTheme();
   const router = useRouter();
   const name = useSession((s) => s.customerName);
   const { data, isLoading, error, refetch, isRefetching } = usePosition();
 
   return (
-    <ScrollView
-      style={{ backgroundColor: t.bg }}
-      contentContainerStyle={{ padding: spacing(4), gap: spacing(3) }}
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} />}
-    >
+    <Screen refreshing={isRefetching} onRefresh={() => void refetch()}>
       <Title>Hola{name ? `, ${name}` : ''}</Title>
       {error ? <ErrorText>{(error as Error).message}</ErrorText> : null}
       {isLoading && <Label muted>Cargando tu posición…</Label>}
@@ -76,8 +69,8 @@ export default function PositionScreen() {
           ))}
         </>
       )}
-      <View style={{ height: spacing(2) }} />
+      <Spacer />
       <Button title="Cerrar sesión" variant="secondary" onPress={() => authApi.logout()} />
-    </ScrollView>
+    </Screen>
   );
 }

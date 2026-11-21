@@ -26,6 +26,8 @@ jobs:
       - run: npm ci
       - run: npx prettier --check "src/**/*.{ts,tsx}"
       - run: npm run lint
+      - name: Design tokens generados al día
+        run: npm run tokens && git diff --exit-code -- src/shared/ui/tokens.generated.ts
       - run: npm run typecheck
       - run: npx jest --coverage --coverageReporters=lcov --coverageReporters=text-summary
       - name: Bundle JS de producción (Android) sin errores
@@ -38,11 +40,13 @@ jobs:
         with: { name: coverage, path: coverage/lcov.info, retention-days: 7 }
 
   bridge-contract:
-    name: Contrato del puente WebView
+    name: Contratos (puente WebView + design tokens)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: sha256sum -c contracts/bridge-protocol.sha256
+      - name: Design tokens idénticos en spa-banca-movil y spa-recaudos
+        run: sha256sum -c contracts/design-tokens.sha256
 
   sonar:
     name: SonarQube (quality gate)

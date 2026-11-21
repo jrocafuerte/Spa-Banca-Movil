@@ -64,8 +64,26 @@ src/
   features/
     auth/ position/ transfers/ card-payments/
     service-payments/     # Host WebView + puente nativo (contrato compartido)
-  shared/ui/              # Componentes y tema (claro/oscuro)
+  shared/ui/              # Kit de UI + tema; ÚNICA capa con primitivas visuales
+    tokens.generated.ts   # generado desde design-tokens/ (no editar)
+design-tokens/            # Fuente única de estilo (W3C DTCG), compartida con spa-recaudos
 ```
+
+### Design System y Design Tokens
+
+```mermaid
+flowchart LR
+  T[design-tokens/*.tokens.json<br/>W3C DTCG] -- Style Dictionary --> N[tokens.generated.ts]
+  T -- Style Dictionary --> C[tokens.generated.css]
+  N --> K[src/shared/ui<br/>kit de la app] --> P[Pantallas]
+  C --> G[globals.css<br/>clases del micro frontend] --> W[Componentes web]
+```
+
+- Una sola fuente de tokens (primitivos + semánticos por tema claro/oscuro) genera el estilo de **ambos** frontends: la app y el micro frontend se ven idénticos y cambian juntos.
+- Las pantallas no conocen valores visuales: la app solo importa `src/shared/ui` (ESLint prohíbe primitivas de `react-native`, estilos inline y colores fijos en `src/app` y `src/features`); el micro frontend solo usa clases basadas en `var(--…)`.
+- **Cambiar al Design System del banco**: reemplazar los `*.tokens.json` (o leerlos desde su paquete npm) manteniendo las claves semánticas del contrato — ver [`design-tokens/README.md`](../design-tokens/README.md). No se modifican pantallas.
+- CI: los archivos generados deben estar al día y la carpeta `design-tokens/` debe ser idéntica en ambos repos (`contracts/design-tokens.sha256`).
+- Siguiente paso (cuando se conozca la librería de componentes del Design System): contrato de componentes + adaptador, para sustituir también el kit `src/shared/ui`.
 
 ## 4. Autenticación y gestión de sesión
 
@@ -192,7 +210,7 @@ flowchart LR
 | Contenedores | Hadolint, Trivy image | BFFs, Next | sí |
 | DAST | OWASP ZAP API scan **autenticado** (mse-banca-movil), API scan (mse-recaudos), baseline (spa-recaudos) | BFFs, Next | sí (alertas High) |
 | Binario móvil | MobSF sobre APK release (score mínimo + 0 high) | app | sí |
-| Contrato | Hash del contrato del puente | app, Next | sí |
+| Contratos | Hash del contrato del puente y de los design tokens; tokens generados al día; sin colores literales | app, Next | sí |
 
 ## 8. Despliegue (referencia)
 

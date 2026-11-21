@@ -36,6 +36,7 @@
     "jest": "^30.5.2",
     "jest-expo": "^58.0.15",
     "prettier": "^3.10.1",
+    "style-dictionary": "^5.8.0",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -46,7 +47,8 @@
     "test": "jest",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "tokens": "node design-tokens/build.mjs --target=native --out=src/shared/ui/tokens.generated.ts && prettier --write src/shared/ui/tokens.generated.ts"
   },
   "private": true,
   "jest": {

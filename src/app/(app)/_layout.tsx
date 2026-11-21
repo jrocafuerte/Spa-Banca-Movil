@@ -1,10 +1,10 @@
 import { Tabs } from 'expo-router';
-import { useTheme } from '../../shared/ui/theme';
+import { useTabOptions } from '../../shared/ui/navigation';
 
 export default function AppLayout() {
-  const t = useTheme();
+  const tabOptions = useTabOptions();
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: t.primary, headerShadowVisible: false }}>
+    <Tabs screenOptions={tabOptions}>
       <Tabs.Screen name="index" options={{ title: 'Inicio', headerTitle: 'Mi posición' }} />
       <Tabs.Screen name="transfers" options={{ title: 'Transferir', headerShown: false }} />
       <Tabs.Screen name="payments" options={{ title: 'Pagar', headerShown: false }} />
