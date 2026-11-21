@@ -7,6 +7,7 @@ import { ApiError } from '../core/api/http';
 import { SecurityGate } from '../core/security/SecurityGate';
 import { secureStorage } from '../core/security/secureStorage';
 import { useSession } from '../core/session/sessionStore';
+import { UiProvider } from '../shared/ui';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,17 +37,19 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <SecurityGate>
-          <StatusBar style="auto" />
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Protected guard={status === 'signedIn'}>
-              <Stack.Screen name="(app)" />
-            </Stack.Protected>
-            <Stack.Protected guard={status !== 'signedIn'}>
-              <Stack.Screen name="(auth)" />
-            </Stack.Protected>
-          </Stack>
-        </SecurityGate>
+        <UiProvider>
+          <SecurityGate>
+            <StatusBar style="auto" />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Protected guard={status === 'signedIn'}>
+                <Stack.Screen name="(app)" />
+              </Stack.Protected>
+              <Stack.Protected guard={status !== 'signedIn'}>
+                <Stack.Screen name="(auth)" />
+              </Stack.Protected>
+            </Stack>
+          </SecurityGate>
+        </UiProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
   );

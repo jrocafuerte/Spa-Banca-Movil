@@ -2,6 +2,12 @@
 const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
 
+/**
+ * Paquetes del Design System del banco (p. ej. '@banco/react-native-ds').
+ * Solo pueden importarse dentro de src/shared/ui/adapters/**.
+ */
+const DESIGN_SYSTEM_PACKAGES = [];
+
 /** Valores visuales fijos prohibidos: deben venir de los Design Tokens. */
 const HEX_COLOR = {
   selector: "Literal[value=/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
@@ -52,6 +58,16 @@ module.exports = defineConfig([
                 'Modal',
               ],
               message: 'Importa componentes desde src/shared/ui (capa del Design System).',
+            },
+            ...DESIGN_SYSTEM_PACKAGES.map((name) => ({
+              name,
+              message: 'El Design System solo se usa a través de su adaptador (src/shared/ui/adapters).',
+            })),
+          ],
+          patterns: [
+            {
+              group: ['**/shared/ui/adapters/**', '**/shared/ui/kit'],
+              message: 'Usa la API pública src/shared/ui; el adaptador se elige solo en kit.ts.',
             },
           ],
         },

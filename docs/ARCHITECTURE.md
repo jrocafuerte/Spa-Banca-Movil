@@ -64,7 +64,11 @@ src/
   features/
     auth/ position/ transfers/ card-payments/
     service-payments/     # Host WebView + puente nativo (contrato compartido)
-  shared/ui/              # Kit de UI + tema; ÚNICA capa con primitivas visuales
+  shared/ui/              # API pública de UI; ÚNICA capa con primitivas visuales
+    contract.ts           # contrato de componentes (UiKit)
+    kit.ts                # selección del adaptador (1 línea)
+    adapters/default/     # kit propio; adapters/<ds>/ para el Design System del banco
+    __tests__/            # suite de conformidad del contrato
     tokens.generated.ts   # generado desde design-tokens/ (no editar)
 design-tokens/            # Fuente única de estilo (W3C DTCG), compartida con spa-recaudos
 ```
@@ -83,7 +87,7 @@ flowchart LR
 - Las pantallas no conocen valores visuales: la app solo importa `src/shared/ui` (ESLint prohíbe primitivas de `react-native`, estilos inline y colores fijos en `src/app` y `src/features`); el micro frontend solo usa clases basadas en `var(--…)`.
 - **Cambiar al Design System del banco**: reemplazar los `*.tokens.json` (o leerlos desde su paquete npm) manteniendo las claves semánticas del contrato — ver [`design-tokens/README.md`](../design-tokens/README.md). No se modifican pantallas.
 - CI: los archivos generados deben estar al día y la carpeta `design-tokens/` debe ser idéntica en ambos repos (`contracts/design-tokens.sha256`).
-- Siguiente paso (cuando se conozca la librería de componentes del Design System): contrato de componentes + adaptador, para sustituir también el kit `src/shared/ui`.
+- **Componentes intercambiables (React Native)**: las pantallas usan un contrato de componentes (`src/shared/ui/contract.ts`) implementado por un adaptador elegido en una sola línea (`src/shared/ui/kit.ts`). El adaptador por defecto es el kit propio; el del Design System del banco envuelve su librería. Una suite de conformidad (comportamiento, accesibilidad y seguridad, p. ej. campos de clave ocultos y sin copiar/pegar) valida en CI el adaptador activo. Guía: [`src/shared/ui/adapters/README.md`](../src/shared/ui/adapters/README.md).
 
 ## 4. Autenticación y gestión de sesión
 

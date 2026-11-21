@@ -1,9 +1,8 @@
 /**
- * Kit de UI de la app. Es la ÚNICA capa que importa primitivas visuales de
- * react-native (regla ESLint `no-restricted-imports` en pantallas). Todos los
- * valores visuales provienen de los Design Tokens (./theme).
+ * Adaptador POR DEFECTO del contrato de UI: implementación propia con
+ * primitivas de react-native y Design Tokens. Sirve de referencia para
+ * escribir el adaptador del Design System del banco (ver ../README.md).
  */
-import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -13,27 +12,33 @@ import {
   Switch,
   Text,
   TextInput,
-  type TextInputProps,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { type SpacingToken, useTheme } from './theme';
+import type {
+  ButtonProps,
+  CardProps,
+  ChipProps,
+  ErrorTextProps,
+  HeaderButtonProps,
+  InlineProps,
+  LabelProps,
+  ProviderProps,
+  RowProps,
+  ScreenProps,
+  SpacerProps,
+  SwitchFieldProps,
+  TextFieldProps,
+  TitleProps,
+  UiKit,
+} from '../../contract';
+import { useTheme } from '../../theme';
 
-export { useTheme } from './theme';
+function Provider({ children }: ProviderProps) {
+  return <>{children}</>;
+}
 
-export function Screen({
-  children,
-  scroll = true,
-  center = false,
-  refreshing,
-  onRefresh,
-}: {
-  children: ReactNode;
-  scroll?: boolean;
-  center?: boolean;
-  refreshing?: boolean;
-  onRefresh?: () => void;
-}) {
+function Screen({ children, scroll = true, center = false, refreshing, onRefresh }: ScreenProps) {
   const t = useTheme();
   const content = (
     <View style={[{ padding: t.spacing.lg, gap: t.spacing.md }, center && styles.center]}>{children}</View>
@@ -59,17 +64,7 @@ export function Screen({
 }
 
 /** Disposición horizontal con separación de tokens. */
-export function Inline({
-  children,
-  gap = 'sm',
-  wrap = false,
-  justify = 'flex-start',
-}: {
-  children: ReactNode;
-  gap?: SpacingToken;
-  wrap?: boolean;
-  justify?: 'flex-start' | 'space-between' | 'center';
-}) {
+function Inline({ children, gap = 'sm', wrap = false, justify = 'flex-start' }: InlineProps) {
   const t = useTheme();
   return (
     <View style={[styles.inline, { gap: t.spacing[gap], flexWrap: wrap ? 'wrap' : 'nowrap', justifyContent: justify }]}>
@@ -78,12 +73,12 @@ export function Inline({
   );
 }
 
-export function Spacer({ size = 'sm' }: { size?: SpacingToken }) {
+function Spacer({ size = 'sm' }: SpacerProps) {
   const t = useTheme();
   return <View style={{ height: t.spacing[size] }} />;
 }
 
-export function Loading() {
+function Loading() {
   const t = useTheme();
   return (
     <View style={[styles.fill, styles.center]}>
@@ -92,7 +87,7 @@ export function Loading() {
   );
 }
 
-export function Title({ children }: { children: ReactNode }) {
+function Title({ children }: TitleProps) {
   const t = useTheme();
   return (
     <Text
@@ -104,7 +99,7 @@ export function Title({ children }: { children: ReactNode }) {
   );
 }
 
-export function Label({ children, muted, center }: { children: ReactNode; muted?: boolean; center?: boolean }) {
+function Label({ children, muted, center }: LabelProps) {
   const t = useTheme();
   return (
     <Text
@@ -119,17 +114,7 @@ export function Label({ children, muted, center }: { children: ReactNode; muted?
   );
 }
 
-export function Card({
-  children,
-  selected,
-  onPress,
-  accessibilityLabel,
-}: {
-  children: ReactNode;
-  selected?: boolean;
-  onPress?: () => void;
-  accessibilityLabel?: string;
-}) {
+function Card({ children, selected, onPress, accessibilityLabel }: CardProps) {
   const t = useTheme();
   const s = [
     {
@@ -156,19 +141,7 @@ export function Card({
   );
 }
 
-export function Button({
-  title,
-  onPress,
-  disabled,
-  loading,
-  variant = 'primary',
-}: {
-  title: string;
-  onPress: () => void;
-  disabled?: boolean;
-  loading?: boolean;
-  variant?: 'primary' | 'secondary';
-}) {
+function Button({ title, onPress, disabled, loading, variant = 'primary' }: ButtonProps) {
   const t = useTheme();
   const primary = variant === 'primary';
   const fg = primary ? t.color.onPrimary : t.color.primary;
@@ -200,7 +173,7 @@ export function Button({
 }
 
 /** Botón de icono/texto para cabeceras nativas (p. ej. "atrás"). */
-export function HeaderButton({ label, glyph, onPress }: { label: string; glyph: string; onPress: () => void }) {
+function HeaderButton({ label, glyph, onPress }: HeaderButtonProps) {
   const t = useTheme();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={t.spacing.md}>
@@ -211,15 +184,17 @@ export function HeaderButton({ label, glyph, onPress }: { label: string; glyph: 
   );
 }
 
-export function TextField({ label, error, ...props }: TextInputProps & { label: string; error?: string }) {
+function TextField({ label, error, ...props }: TextFieldProps) {
   const t = useTheme();
   return (
     <View style={{ gap: t.spacing.xs }}>
       <Text style={{ color: t.color.textMuted, fontSize: t.font.size.label }}>{label}</Text>
       <TextInput
         placeholderTextColor={t.color.textMuted}
-        autoCorrect={false}
         // Evita que el teclado aprenda/sugiera datos sensibles
+        autoCorrect={false}
+        spellCheck={false}
+        autoCapitalize="none"
         {...props}
         accessibilityLabel={label}
         style={{
@@ -241,15 +216,7 @@ export function TextField({ label, error, ...props }: TextInputProps & { label: 
   );
 }
 
-export function SwitchField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: boolean;
-  onChange: (v: boolean) => void;
-}) {
+function SwitchField({ label, value, onChange }: SwitchFieldProps) {
   const t = useTheme();
   return (
     <Inline justify="space-between">
@@ -264,7 +231,7 @@ export function SwitchField({
   );
 }
 
-export function ErrorText({ children }: { children?: ReactNode }) {
+function ErrorText({ children }: ErrorTextProps) {
   const t = useTheme();
   if (!children) return null;
   return (
@@ -274,7 +241,7 @@ export function ErrorText({ children }: { children?: ReactNode }) {
   );
 }
 
-export function Row({ left, right, sub }: { left: ReactNode; right?: ReactNode; sub?: ReactNode }) {
+function Row({ left, right, sub }: RowProps) {
   const t = useTheme();
   return (
     <View style={[styles.inline, { gap: t.spacing.md }]}>
@@ -295,7 +262,7 @@ export function Row({ left, right, sub }: { left: ReactNode; right?: ReactNode; 
   );
 }
 
-export function Chip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+function Chip({ label, selected, onPress }: ChipProps) {
   const t = useTheme();
   return (
     <Pressable
@@ -323,3 +290,21 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.75 },
   disabled: { opacity: 0.5 },
 });
+
+export const defaultKit = {
+  Provider,
+  Screen,
+  Inline,
+  Spacer,
+  Loading,
+  Title,
+  Label,
+  Card,
+  Button,
+  HeaderButton,
+  TextField,
+  SwitchField,
+  ErrorText,
+  Row,
+  Chip,
+} satisfies UiKit;
