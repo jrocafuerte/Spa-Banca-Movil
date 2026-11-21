@@ -1,0 +1,44 @@
+# Reglas SAST propias de la app móvil (OWASP MASVS).
+rules:
+  - id: no-async-storage-for-secrets
+    message: MASVS-STORAGE-1 — usar expo-secure-store (Keychain/Keystore), nunca AsyncStorage para datos sensibles
+    severity: ERROR
+    languages: [typescript]
+    pattern-either:
+      - pattern: import $X from '@react-native-async-storage/async-storage'
+      - pattern: import { $X } from '@react-native-async-storage/async-storage'
+
+  - id: webview-insecure-props
+    message: MASVS-PLATFORM — WebView con acceso a archivos, contenido mixto u orígenes abiertos
+    severity: ERROR
+    languages: [typescript]
+    pattern-either:
+      - pattern: <$W ... allowFileAccess={true} ... />
+      - pattern: <$W ... allowUniversalAccessFromFileURLs={true} ... />
+      - pattern: <$W ... mixedContentMode="always" ... />
+      - pattern: <$W ... originWhitelist={['*']} ... />
+
+  - id: no-console-log-sensitive
+    message: No registrar tokens, contraseñas u OTP (los logs del dispositivo son legibles)
+    severity: ERROR
+    languages: [typescript]
+    pattern-either:
+      - pattern: console.$M(..., <... $X.password ...>, ...)
+      - pattern: console.$M(..., <... $X.otp ...>, ...)
+      - pattern: console.$M(..., <... $X.accessToken ...>, ...)
+      - pattern: console.$M(..., <... $X.refreshToken ...>, ...)
+
+  - id: no-http-urls-in-production-config
+    message: MASVS-NETWORK-1 — URLs de producción/QA deben ser https
+    severity: ERROR
+    languages: [typescript]
+    paths: { include: [app.config.ts] }
+    pattern-regex: "(qa|production):\\s*\\{[^}]*http://"
+
+  - id: no-eval
+    message: Ejecución dinámica de código prohibida
+    severity: ERROR
+    languages: [typescript]
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)

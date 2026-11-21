@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Las dependencias de Expo se actualizan juntas con `npx expo install --fix` al subir de SDK.
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 10
+    groups:
+      expo-sdk: { patterns: ['expo', 'expo-*', 'react-native', 'react-native-*', 'react', '@expo/*'] }
+      dev-tooling: { dependency-type: development }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }

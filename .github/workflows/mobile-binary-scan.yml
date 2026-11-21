@@ -1,0 +1,44 @@
+# Análisis del BINARIO (lo que realmente se publica en las tiendas):
+# 1) Genera el proyecto nativo (Continuous Native Generation) y compila un APK release.
+# 2) MobSF: análisis estático del APK (manifest, permisos, red, criptografía, secretos, ofuscación).
+# El análisis dinámico (DAST móvil: Frida/objection, MobSF dynamic, pentest) se realiza en QA
+# sobre dispositivos/emuladores controlados antes de cada release mayor.
+name: Mobile binary scan
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '47 4 * * 1' # semanal
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-mobsf:
+    runs-on: ubuntu-latest
+    services:
+      mobsf:
+        image: opensecurity/mobile-security-framework-mobsf:latest
+        ports: ['8000:8000']
+        env:
+          MOBSF_API_KEY: ci-mobsf-api-key-only-for-this-ephemeral-runner
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - run: npm ci
+      - name: Prebuild + APK release (firma de CI, no la de tienda)
+        env: { APP_ENV: qa }
+        run: |
+          npx expo prebuild --platform android --no-install
+          cd android && ./gradlew assembleRelease --no-daemon
+      - name: Escaneo MobSF
+        env: { MOBSF_API_KEY: ci-mobsf-api-key-only-for-this-ephemeral-runner }
+        run: ./scripts/mobsf-scan.sh android/app/build/outputs/apk/release/app-release.apk
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: mobsf-report, path: reports/ }

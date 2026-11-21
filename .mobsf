@@ -1,0 +1,15 @@
+---
+# Configuración de mobsfscan. Cada regla ignorada debe estar justificada y revisada por Seguridad.
+- ignore-paths:
+    - node_modules
+    - dist
+  ignore-rules:
+    # El micro frontend de recaudos necesita JS. Mitigación: allowlist de orígenes
+    # (originWhitelist + onShouldStartLoadWithRequest), CSP estricta con nonce, incognito,
+    # sin acceso a archivos. La regla Semgrep `webview-insecure-props` vigila el resto.
+    - js_webview_javascript_enabled
+    # onMessage SÍ se valida (origen + schema Zod) dentro de createNativeBridge().onMessage;
+    # mobsfscan no sigue la delegación. Cubierto por nativeBridge.test.ts.
+    - js_webview_unverified_onmessage
+    # La URI proviene de app.config.ts (constante del binario), no de entrada del usuario.
+    - js_webview_dynamic_uri
