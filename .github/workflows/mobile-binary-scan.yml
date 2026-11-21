@@ -39,6 +39,6 @@ jobs:
       - name: Escaneo MobSF
         env: { MOBSF_API_KEY: ci-mobsf-api-key-only-for-this-ephemeral-runner }
         run: ./scripts/mobsf-scan.sh android/app/build/outputs/apk/release/app-release.apk
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with: { name: mobsf-report, path: reports/ }
