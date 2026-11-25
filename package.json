@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo-google-fonts/lexend": "^0.4.1",
     "@expo/vector-icons": "^15.0.2",
     "@tanstack/react-query": "^5.108.2",
     "expo": "~58.0.26",
@@ -52,7 +53,8 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "tokens": "node design-tokens/build.mjs --target=native --out=src/shared/ui/tokens.generated.ts && prettier --write src/shared/ui/tokens.generated.ts"
+    "tokens": "node design-tokens/build.mjs --target=native --out=src/shared/ui/tokens.generated.ts && prettier --write src/shared/ui/tokens.generated.ts",
+    "tokens:import-beat": "node design-tokens/import-beat.mjs"
   },
   "private": true,
   "jest": {

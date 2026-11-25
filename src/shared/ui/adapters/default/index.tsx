@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type {
   ButtonProps,
@@ -36,9 +37,14 @@ import type {
   TitleProps,
   UiKit,
 } from '../../contract';
+import { FONT_ASSETS } from '../../fonts';
 import { useTheme } from '../../theme';
 
+/** Carga las fuentes del Design System antes de mostrar la UI (evita saltos de tipografía). */
 function Provider({ children }: ProviderProps) {
+  const [loaded, error] = useFonts(FONT_ASSETS);
+  // Si falla la carga se continúa con la fuente del sistema: nunca bloquear la app.
+  if (!loaded && !error) return null;
   return <>{children}</>;
 }
 
@@ -94,10 +100,7 @@ function Loading() {
 function Title({ children }: TitleProps) {
   const t = useTheme();
   return (
-    <Text
-      style={{ color: t.color.text, fontSize: t.font.size.title, fontWeight: t.font.weight.bold }}
-      accessibilityRole="header"
-    >
+    <Text style={{ color: t.color.text, fontSize: t.font.size.title, ...t.text('bold') }} accessibilityRole="header">
       {children}
     </Text>
   );
@@ -110,6 +113,7 @@ function Label({ children, muted, center }: LabelProps) {
       style={{
         color: muted ? t.color.textMuted : t.color.text,
         fontSize: t.font.size.body,
+        ...t.text(),
         textAlign: center ? 'center' : 'auto',
       }}
     >
@@ -160,8 +164,10 @@ function Button({ title, onPress, disabled, loading, variant = 'primary' }: Butt
           backgroundColor: primary ? t.color.primary : 'transparent',
           borderColor: t.color.primary,
           borderWidth: t.border.width.thin,
-          borderRadius: t.radius.lg,
-          paddingVertical: t.spacing.lg,
+          borderRadius: t.radius.md,
+          minHeight: t.size.control,
+          paddingHorizontal: t.spacing.xl,
+          justifyContent: 'center',
           alignItems: 'center',
         },
         disabled ? styles.disabled : pressed && styles.pressed,
@@ -170,7 +176,7 @@ function Button({ title, onPress, disabled, loading, variant = 'primary' }: Butt
       {loading ? (
         <ActivityIndicator color={fg} />
       ) : (
-        <Text style={{ color: fg, fontSize: t.font.size.body, fontWeight: t.font.weight.semibold }}>{title}</Text>
+        <Text style={{ color: fg, fontSize: t.font.size.body, ...t.text('semibold') }}>{title}</Text>
       )}
     </Pressable>
   );
@@ -181,7 +187,9 @@ function HeaderButton({ label, glyph, onPress }: HeaderButtonProps) {
   const t = useTheme();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={t.spacing.md}>
-      <Text style={{ color: t.color.primary, fontSize: t.font.size.display, paddingHorizontal: t.spacing.sm }}>
+      <Text
+        style={{ color: t.color.primary, fontSize: t.font.size.display, paddingHorizontal: t.spacing.sm, ...t.text() }}
+      >
         {glyph}
       </Text>
     </Pressable>
@@ -193,7 +201,7 @@ function TextField({ label, error, ...props }: TextFieldProps) {
   const [focused, setFocused] = useState(false);
   return (
     <View style={{ gap: t.spacing.xs }}>
-      <Text style={{ color: t.color.textMuted, fontSize: t.font.size.label }}>{label}</Text>
+      <Text style={{ color: t.color.textMuted, fontSize: t.font.size.label, ...t.text() }}>{label}</Text>
       <TextInput
         placeholderTextColor={t.color.textMuted}
         // Evita que el teclado aprenda/sugiera datos sensibles
@@ -213,12 +221,17 @@ function TextField({ label, error, ...props }: TextFieldProps) {
           outlineWidth: 0,
           outlineStyle: 'solid', // con 'auto' Chrome ignora el ancho 0 y dibuja su anillo
           borderRadius: t.radius.md,
-          padding: t.spacing.md,
+          minHeight: t.size.control,
+          paddingHorizontal: t.spacing.md,
           fontSize: t.font.size.input,
+          ...t.text(),
         }}
       />
       {error ? (
-        <Text style={{ color: t.color.danger, fontSize: t.font.size.caption }} accessibilityLiveRegion="polite">
+        <Text
+          style={{ color: t.color.danger, fontSize: t.font.size.caption, ...t.text() }}
+          accessibilityLiveRegion="polite"
+        >
           {error}
         </Text>
       ) : null}
@@ -245,7 +258,7 @@ function ErrorText({ children }: ErrorTextProps) {
   const t = useTheme();
   if (!children) return null;
   return (
-    <Text style={{ color: t.color.danger, fontSize: t.font.size.body }} accessibilityRole="alert">
+    <Text style={{ color: t.color.danger, fontSize: t.font.size.body, ...t.text() }} accessibilityRole="alert">
       {children}
     </Text>
   );
@@ -256,17 +269,22 @@ function Row({ left, right, sub }: RowProps) {
   return (
     <View style={[styles.inline, { gap: t.spacing.md }]}>
       <View style={styles.fill}>
-        <Text style={{ color: t.color.text, fontSize: t.font.size.body }}>{left}</Text>
+        <Text style={{ color: t.color.text, fontSize: t.font.size.body, ...t.text() }}>{left}</Text>
         {sub ? (
-          <Text style={{ color: t.color.textMuted, fontSize: t.font.size.caption, marginTop: t.spacing.xs / 2 }}>
+          <Text
+            style={{
+              color: t.color.textMuted,
+              fontSize: t.font.size.caption,
+              marginTop: t.spacing.xs / 2,
+              ...t.text(),
+            }}
+          >
             {sub}
           </Text>
         ) : null}
       </View>
       {right ? (
-        <Text style={{ color: t.color.text, fontSize: t.font.size.body, fontWeight: t.font.weight.semibold }}>
-          {right}
-        </Text>
+        <Text style={{ color: t.color.text, fontSize: t.font.size.body, ...t.text('semibold') }}>{right}</Text>
       ) : null}
     </View>
   );
@@ -288,7 +306,9 @@ function Chip({ label, selected, onPress }: ChipProps) {
         backgroundColor: selected ? t.color.primary : t.color.surface,
       }}
     >
-      <Text style={{ color: selected ? t.color.onPrimary : t.color.text, fontSize: t.font.size.label }}>{label}</Text>
+      <Text style={{ color: selected ? t.color.onPrimary : t.color.text, fontSize: t.font.size.label, ...t.text() }}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
