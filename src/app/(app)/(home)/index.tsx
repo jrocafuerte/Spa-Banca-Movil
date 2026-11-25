@@ -34,6 +34,8 @@ export default function PositionScreen() {
               accessibilityLabel={`Cuenta ${a.numberMasked}`}
             >
               <Row
+                icon="account"
+                chevron
                 left={`${a.type === 'SAVINGS' ? 'Ahorros' : 'Corriente'} ${a.numberMasked}`}
                 sub="Disponible"
                 right={formatMoney(a.availableBalance, a.currency)}
@@ -49,6 +51,7 @@ export default function PositionScreen() {
               accessibilityLabel={`Tarjeta ${c.panMasked}`}
             >
               <Row
+                icon="card"
                 left={`${c.brand} ${c.panMasked}`}
                 sub={`Vence ${formatDate(c.dueDate)}`}
                 right={formatMoney(c.statementBalance, c.currency)}
@@ -61,6 +64,7 @@ export default function PositionScreen() {
           {data.loans.map((l) => (
             <Card key={l.id}>
               <Row
+                icon="loan"
                 left={l.product}
                 sub={`Próxima cuota ${formatDate(l.nextDueDate)}`}
                 right={formatMoney(l.nextInstallment, l.currency)}

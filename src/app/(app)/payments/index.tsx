@@ -6,10 +6,10 @@ export default function PaymentsHome() {
   return (
     <Screen>
       <Card onPress={() => router.push('/payments/card')} accessibilityLabel="Pagar tarjeta de crédito">
-        <Row left="Tarjetas de crédito" sub="Paga el mínimo, el total u otro monto" right="›" />
+        <Row icon="card" chevron left="Tarjetas de crédito" sub="Paga el mínimo, el total u otro monto" />
       </Card>
       <Card onPress={() => router.push('/payments/services')} accessibilityLabel="Pagar servicios">
-        <Row left="Servicios" sub="Luz, agua, telefonía, educación y más" right="›" />
+        <Row icon="services" chevron left="Servicios" sub="Luz, agua, telefonía, educación y más" />
       </Card>
       <Label muted>Más opciones de pago estarán disponibles pronto.</Label>
     </Screen>

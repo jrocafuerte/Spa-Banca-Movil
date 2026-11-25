@@ -72,9 +72,9 @@ export interface ButtonProps {
 }
 
 export interface HeaderButtonProps {
-  /** Etiqueta accesible obligatoria (el glifo no es legible por lectores de pantalla). */
+  /** Etiqueta accesible obligatoria (el ícono no es legible por lectores de pantalla). */
   label: string;
-  glyph: string;
+  icon: IconName;
   onPress: () => void;
 }
 
@@ -109,6 +109,10 @@ export interface RowProps {
   left: ReactNode;
   right?: ReactNode;
   sub?: ReactNode;
+  /** Ícono decorativo al inicio de la fila. */
+  icon?: IconName;
+  /** Indicador de navegación (la fila abre otra pantalla). */
+  chevron?: boolean;
 }
 
 export interface ChipProps {
@@ -118,7 +122,21 @@ export interface ChipProps {
 }
 
 /** Nombres SEMÁNTICOS de íconos; cada adaptador los traduce a su set (Ionicons, íconos del DS…). */
-export type IconName = 'home' | 'transfer' | 'pay' | 'card' | 'services' | 'chevron-right' | 'back' | 'success';
+export type IconName =
+  | 'home'
+  | 'transfer'
+  | 'pay'
+  | 'card'
+  | 'services'
+  | 'account'
+  | 'loan'
+  | 'income'
+  | 'expense'
+  | 'logout'
+  | 'share'
+  | 'chevron-right'
+  | 'back'
+  | 'success';
 
 export interface IconProps {
   name: IconName;

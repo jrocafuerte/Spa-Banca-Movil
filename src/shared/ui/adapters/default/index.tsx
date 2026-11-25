@@ -15,7 +15,24 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import {
+  faArrowDown,
+  faArrowLeft,
+  faArrowRightArrowLeft,
+  faArrowUp,
+  faBuildingColumns,
+  faChevronRight,
+  faCircleCheck,
+  faCreditCard,
+  faFileInvoiceDollar,
+  faHandHoldingDollar,
+  faHouse,
+  faRightFromBracket,
+  faShareNodes,
+  faWallet,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type {
@@ -183,15 +200,17 @@ function Button({ title, onPress, disabled, loading, variant = 'primary' }: Butt
 }
 
 /** Botón de icono/texto para cabeceras nativas (p. ej. "atrás"). */
-function HeaderButton({ label, glyph, onPress }: HeaderButtonProps) {
+function HeaderButton({ label, icon, onPress }: HeaderButtonProps) {
   const t = useTheme();
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={t.spacing.md}>
-      <Text
-        style={{ color: t.color.primary, fontSize: t.font.size.display, paddingHorizontal: t.spacing.sm, ...t.text() }}
-      >
-        {glyph}
-      </Text>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      hitSlop={t.spacing.md}
+      style={{ paddingHorizontal: t.spacing.sm }}
+    >
+      <Icon name={icon} color={t.color.primary} size={t.font.size.title} />
     </Pressable>
   );
 }
@@ -264,10 +283,11 @@ function ErrorText({ children }: ErrorTextProps) {
   );
 }
 
-function Row({ left, right, sub }: RowProps) {
+function Row({ left, right, sub, icon, chevron }: RowProps) {
   const t = useTheme();
   return (
     <View style={[styles.inline, { gap: t.spacing.md }]}>
+      {icon ? <Icon name={icon} color={t.color.primary} size={t.font.size.title} /> : null}
       <View style={styles.fill}>
         <Text style={{ color: t.color.text, fontSize: t.font.size.body, ...t.text() }}>{left}</Text>
         {sub ? (
@@ -286,6 +306,7 @@ function Row({ left, right, sub }: RowProps) {
       {right ? (
         <Text style={{ color: t.color.text, fontSize: t.font.size.body, ...t.text('semibold') }}>{right}</Text>
       ) : null}
+      {chevron ? <Icon name="chevron-right" color={t.color.textMuted} size={t.font.size.label} /> : null}
     </View>
   );
 }
@@ -321,28 +342,37 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.5 },
 });
 
-const IONICONS: Record<IconName, keyof typeof Ionicons.glyphMap> = {
-  home: 'home-outline',
-  transfer: 'swap-horizontal-outline',
-  pay: 'wallet-outline',
-  card: 'card-outline',
-  services: 'receipt-outline',
-  'chevron-right': 'chevron-forward',
-  back: 'chevron-back',
-  success: 'checkmark-circle',
+/** Íconos Font Awesome (los mismos que usa el Design System Beat; hoy el set Free). */
+const ICONS: Record<IconName, IconDefinition> = {
+  home: faHouse,
+  transfer: faArrowRightArrowLeft,
+  pay: faWallet,
+  card: faCreditCard,
+  services: faFileInvoiceDollar,
+  account: faBuildingColumns,
+  loan: faHandHoldingDollar,
+  income: faArrowDown,
+  expense: faArrowUp,
+  logout: faRightFromBracket,
+  share: faShareNodes,
+  'chevron-right': faChevronRight,
+  back: faArrowLeft,
+  success: faCircleCheck,
 };
 
 function Icon({ name, color, size, accessibilityLabel }: IconProps) {
   const t = useTheme();
+  const fill = typeof color === 'string' ? color : t.color.text;
   return (
-    <Ionicons
-      name={IONICONS[name]}
-      color={typeof color === 'number' ? undefined : (color ?? t.color.text)}
-      size={size ?? t.font.size.title}
+    <View
+      accessible={!!accessibilityLabel}
+      accessibilityRole={accessibilityLabel ? 'image' : undefined}
       accessibilityLabel={accessibilityLabel}
       accessibilityElementsHidden={!accessibilityLabel}
       importantForAccessibility={accessibilityLabel ? 'yes' : 'no-hide-descendants'}
-    />
+    >
+      <FontAwesomeIcon icon={ICONS[name]} color={fill} size={size ?? t.font.size.title} />
+    </View>
   );
 }
 

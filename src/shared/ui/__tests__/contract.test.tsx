@@ -98,8 +98,8 @@ describe('Contrato UI — selección y navegación', () => {
     expect(onPress).toHaveBeenCalled();
   });
 
-  it('HeaderButton usa la etiqueta accesible, no el glifo', async () => {
-    await r(<HeaderButton label="Atrás" glyph="‹" onPress={() => {}} />);
+  it('HeaderButton usa la etiqueta accesible, no el ícono', async () => {
+    await r(<HeaderButton label="Atrás" icon="back" onPress={() => {}} />);
     expect(screen.getByRole('button', { name: 'Atrás' })).toBeOnTheScreen();
   });
 

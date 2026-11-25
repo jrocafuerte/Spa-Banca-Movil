@@ -12,7 +12,12 @@ export default function Movements() {
       {error ? <ErrorText>{(error as Error).message}</ErrorText> : null}
       {data?.items.map((m) => (
         <Card key={m.id}>
-          <Row left={m.description} sub={formatDate(m.date)} right={formatMoney(m.amount, m.currency)} />
+          <Row
+            icon={m.amount >= 0 ? 'income' : 'expense'}
+            left={m.description}
+            sub={formatDate(m.date)}
+            right={formatMoney(m.amount, m.currency)}
+          />
         </Card>
       ))}
     </Screen>

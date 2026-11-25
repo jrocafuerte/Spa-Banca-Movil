@@ -128,7 +128,7 @@ export function ServicesWebView() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () => <HeaderButton label="Atrás" glyph="‹" onPress={onBack} />,
+      headerLeft: () => <HeaderButton label="Atrás" icon="back" onPress={onBack} />,
     });
     const sub = BackHandler.addEventListener('hardwareBackPress', onBack);
     return () => sub.remove();
